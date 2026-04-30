@@ -1,0 +1,9 @@
+[package]
+name = "data_gen"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+polars = { version = "0.53.0", features = ["parquet"] }
+rand = "0.10.1"
+rand_distr = "0.6.0"
