@@ -1,0 +1,50 @@
+name: Build and Push Release Binary
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build web_server
+        run: cargo build --release -p web_server
+
+      - name: Commit and push binary to release branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Create or switch to the release branch (based on current main)
+          git checkout -B release
+
+          # Create directory for the binary
+          mkdir -p deploy-bin
+
+          # Copy the compiled binary
+          cp target/release/web_server deploy-bin/
+
+          # Force add the binary (overrides potential .gitignore rules)
+          git add -f deploy-bin/web_server
+
+          # Commit the changes. [skip ci] prevents an infinite loop of workflows
+          git commit -m "chore: add release binary for web_server [skip ci]" || echo "No changes to commit"
+
+          # Push to the release branch (force push to keep history aligned with main)
+          git push origin release --force
