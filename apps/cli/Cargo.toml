@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 data_gen = { path = '../../libs/data_gen' }
+training = { path = '../../libs/training/' }

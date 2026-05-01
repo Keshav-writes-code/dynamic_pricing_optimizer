@@ -50,6 +50,7 @@ pub fn gen_data() {
         let weekend_mul = if is_weekend { 0.5 } else { 0.0 };
         let logits = 0.0 - (0.20 * our_price) + (0.15 * comp_price) + (2.5 * demand) + weekend_mul;
 
+        // Basic Signmoid
         let probability = 1.0 / (1.0 + (-logits).exp());
 
         let sold = Bernoulli::new(probability as f64).unwrap().sample(&mut rng);
@@ -74,10 +75,8 @@ pub fn gen_data() {
         ],
     )
     .unwrap();
-    let mut file = File::create("pricing_data.csv").expect("Cannot create a file");
-    // ParquetWriter::new(&mut file).finish(&mut df).unwrap();
-
-    CsvWriter::new(&mut file).finish(&mut df).unwrap();
+    let mut file = File::create("pricing_data.parquet").expect("Cannot create a file");
+    ParquetWriter::new(&mut file).finish(&mut df).unwrap();
 
     println!(
         "Successfully generated pricing_data.parquet with {} rows",
