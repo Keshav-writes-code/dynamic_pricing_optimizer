@@ -34,14 +34,8 @@ jobs:
           # Create or switch to the release branch (based on current main)
           git checkout -B release
 
-          # Create directory for the binary
-          mkdir -p deploy-bin
-
-          # Copy the compiled binary
-          cp target/release/web_server deploy-bin/
-
           # Force add the binary (overrides potential .gitignore rules)
-          git add -f deploy-bin/web_server
+          git add -f target/release/web_server
 
           # Commit the changes. [skip ci] prevents an infinite loop of workflows
           git commit -m "chore: add release binary for web_server [skip ci]" || echo "No changes to commit"
