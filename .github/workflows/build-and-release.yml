@@ -11,8 +11,8 @@ permissions:
   actions: write
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-22.04-arm
+  build-and-deploy:
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -30,27 +30,22 @@ jobs:
       - name: Build web_server
         run: cargo build --release -p web_server
 
-      - name: Strip .gitignore of data files
-        run: |
-          sed -i '/\*\.parquet/d' .gitignore
-          sed -i '/\*\.msgpack/d' .gitignore
+      - name: Copy WebServer via ssh
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER  }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          port: ${{ secrets.AZURE_VM_PORT }}
+          source: target/release/web_server
+          target: "/opt/dynamic_pricing_optimizer/bin/"
 
-      - name: Commit and push binary to release branch
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Create or switch to the release branch (based on current main)
-          git checkout -B release
-
-          # Force add the binary (overrides potential .gitignore rules)
-          git add -f target/release/web_server
-
-          # Add the modified .gitignore and the data files
-          git add .gitignore *.parquet *.msgpack || true
-
-          # Commit the changes. [skip ci] prevents an infinite loop of workflows
-          git commit -m "chore: add release binary and data files [skip ci]" || echo "No changes to commit"
-
-          # Push to the release branch (force push to keep history aligned with main)
-          git push origin release --force
+      - name: Restart Native Service
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER  }}
+          password: ${{ secrets.AZURE_VM_PASSWORD }}
+          port: ${{ secrets.AZURE_VM_PORT }}
+          script: |
+            sudo systemctl restart pricing_service.service
