@@ -60,7 +60,7 @@ async fn main() {
         .with_state(shared_model)
         .layer(TraceLayer::new_for_http());
 
-    let listner = TcpListener::bind("127.0.0.1:3000").await.unwrap();
+    let listner = TcpListener::bind("0.0.0.0:80").await.unwrap();
     axum::serve(listner, app).await.unwrap();
 }
 
