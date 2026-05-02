@@ -1,6 +1,11 @@
-use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
+use std::{fs::File, future::ready, io::BufReader, path::PathBuf, sync::Arc, time::Instant};
 
-use axum::{Json, Router, extract::State, routing::post};
+use axum::{
+    Json, Router,
+    extract::State,
+    routing::{get, post},
+};
+use metrics_exporter_prometheus::PrometheusBuilder;
 use serde::{Deserialize, Serialize};
 use smartcore::{
     ensemble::random_forest_classifier::RandomForestClassifier, linalg::basic::matrix::DenseMatrix,
@@ -35,6 +40,9 @@ struct Cli {
 
 #[tokio::main]
 async fn main() {
+    let builder = PrometheusBuilder::new();
+    let handle = builder.install_recorder().unwrap();
+
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
@@ -48,6 +56,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/api/v1/predict", post(predict_sale))
+        .route("/metrics", get(move || ready(handle.render())))
         .with_state(shared_model)
         .layer(TraceLayer::new_for_http());
 
@@ -59,6 +68,8 @@ async fn predict_sale(
     State(model): State<Arc<Model>>,
     Json(payload): Json<PricingRequest>,
 ) -> Json<PricingResponse> {
+    let start = Instant::now();
+
     let features = vec![
         payload.hour,
         payload.is_weekend,
@@ -69,6 +80,15 @@ async fn predict_sale(
 
     let x_matrix = DenseMatrix::new(1, features.len(), features, false).unwrap();
     let prediction = model.predict(&x_matrix).unwrap();
+
+    metrics::histogram!("inference_duration_seconds").record(start.elapsed().as_secs_f64());
+
+    if prediction[0] == 1 {
+        metrics::counter!("predictions_total", "outcome"=>"sale").increment(1);
+    } else {
+        metrics::counter!("predictions_total", "outcome"=>"no_sale").increment(1);
+    }
+
     Json(PricingResponse {
         will_sell: prediction[0] == 1,
     })
