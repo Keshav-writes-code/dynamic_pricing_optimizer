@@ -24,6 +24,7 @@ struct PricingResponse {
 }
 
 use clap::Parser;
+use tower_http::trace::TraceLayer;
 
 #[derive(Parser)]
 #[command( version, about, long_about = None )]
@@ -34,6 +35,9 @@ struct Cli {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
     let args = Cli::parse();
 
     let model_file = File::open(args.model).unwrap();
@@ -44,7 +48,8 @@ async fn main() {
 
     let app = Router::new()
         .route("/api/v1/predict", post(predict_sale))
-        .with_state(shared_model);
+        .with_state(shared_model)
+        .layer(TraceLayer::new_for_http());
 
     let listner = TcpListener::bind("127.0.0.1:3000").await.unwrap();
     axum::serve(listner, app).await.unwrap();
