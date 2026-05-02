@@ -4,4 +4,4 @@ global:
 scrape_configs:
   - job_name: "pricing_model_api"
     static_configs:
-      - targets: ["127.0.0.1:3000"]
+      - targets: ["127.0.0.1:8080"]
