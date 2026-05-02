@@ -31,14 +31,14 @@ jobs:
         run: cargo build --release -p web_server
 
       - name: Copy WebServer via ssh
-        uses: appleboy/scp-action@v1
+        uses: garygrossgarten/github-action-scp@release
         with:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER  }}
-          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          privateKey: ${{ secrets.AZURE_VM_SSH_KEY }}
           port: ${{ secrets.AZURE_VM_PORT }}
-          source: target/release/web_server
-          target: "/home/${{ secrets.AZURE_VM_USER }}/dynamic_pricing_optimizer/target/release/"
+          local: target/release/web_server
+          remote: "/home/${{ secrets.AZURE_VM_USER }}/dynamic_pricing_optimizer/target/release"
 
       - name: Restart Native Service
         uses: appleboy/ssh-action@v1
