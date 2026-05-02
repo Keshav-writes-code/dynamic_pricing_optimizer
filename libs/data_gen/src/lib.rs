@@ -1,11 +1,8 @@
 use polars::prelude::*;
 use rand_distr::{Bernoulli, Distribution, Normal, Uniform};
-use std::{env, fs::File};
+use std::fs::File;
 
-pub fn gen_data() {
-    let arg = env::args().nth(1).unwrap();
-    let num_rows = arg.parse().unwrap();
-
+pub fn gen_data(num_rows: usize) {
     let mut rng = rand::rng();
 
     //INitalize Distribution

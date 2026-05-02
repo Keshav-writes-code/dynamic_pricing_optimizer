@@ -1,4 +1,4 @@
-use std::{fs::File, io::BufReader, sync::Arc};
+use std::{fs::File, io::BufReader, path::PathBuf, sync::Arc};
 
 use axum::{Json, Router, extract::State, routing::post};
 use serde::{Deserialize, Serialize};
@@ -23,9 +23,20 @@ struct PricingResponse {
     will_sell: bool,
 }
 
+use clap::Parser;
+
+#[derive(Parser)]
+#[command( version, about, long_about = None )]
+struct Cli {
+    #[arg(short, long, default_value = "../../../model.msgpack")]
+    model: PathBuf,
+}
+
 #[tokio::main]
 async fn main() {
-    let model_file = File::open("model.msgpack").unwrap();
+    let args = Cli::parse();
+
+    let model_file = File::open(args.model).unwrap();
     let reader = BufReader::new(model_file);
     let model: Model = rmp_serde::from_read(reader).unwrap();
 
