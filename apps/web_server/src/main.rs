@@ -3,6 +3,7 @@ use std::{fs::File, future::ready, io::BufReader, path::PathBuf, sync::Arc, time
 use axum::{
     Json, Router,
     extract::State,
+    http::{self, HeaderValue, Method},
     routing::{get, post},
 };
 use metrics_exporter_prometheus::PrometheusBuilder;
@@ -29,7 +30,7 @@ struct PricingResponse {
 }
 
 use clap::Parser;
-use tower_http::trace::TraceLayer;
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 #[derive(Parser)]
 #[command( version, about, long_about = None )]
@@ -42,6 +43,19 @@ struct Cli {
 async fn main() {
     let builder = PrometheusBuilder::new();
     let handle = builder.install_recorder().unwrap();
+
+    let origins = [
+        "http://localhost:5173/".parse::<HeaderValue>().unwrap(),
+        "https://keshav.is-a.dev/price_prediction"
+            .parse::<HeaderValue>()
+            .unwrap(),
+    ];
+
+    let cors = CorsLayer::new()
+        .allow_origin(origins)
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        .allow_headers([http::header::CONTENT_TYPE, http::header::AUTHORIZATION])
+        .allow_credentials(true);
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
@@ -58,7 +72,8 @@ async fn main() {
         .route("/api/v1/predict", post(predict_sale))
         .route("/metrics", get(move || ready(handle.render())))
         .with_state(shared_model)
-        .layer(TraceLayer::new_for_http());
+        .layer(TraceLayer::new_for_http())
+        .layer(cors);
 
     let listner = TcpListener::bind("0.0.0.0:8080").await.unwrap();
     axum::serve(listner, app).await.unwrap();
