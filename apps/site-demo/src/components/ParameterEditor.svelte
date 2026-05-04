@@ -137,9 +137,9 @@
     <div class="flex flex-col gap-2 pb-6">
       <div class="flex justify-between items-end mb-2">
         <label for="demand-input" class="text-base-content text-base font-semibold">Demand Level</label>
-        <span class="text-3xl font-bold font-display tracking-tight">{demandLevel.toFixed(1)}</span>
+        <span class="text-3xl font-bold font-display tracking-tight flex items-center"><NumberFlow value={demandLevel} format={{ minimumFractionDigits: 1, maximumFractionDigits: 1 }} /></span>
       </div>
-      <input id="demand-input" type="range" min="0" max="1" step="0.1" bind:value={demandLevel} class="range" />
+      <input id="demand-input" type="range" min="0" max="1" step="0.1" bind:value={demandLevel} class="range range-primary" />
       <div class="flex justify-between text-xs text-base-content/60 font-medium mt-1">
         <span>Low (0.0)</span><span>High (1.0)</span>
       </div>

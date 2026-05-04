@@ -1,4 +1,6 @@
 <script lang="ts">
+  import NumberFlow from "@number-flow/svelte";
+
   let { 
     demandLevel = 0.8,
     competitorPrice = 45,
@@ -38,7 +40,7 @@
       </div>
       <span class="font-medium text-base text-base-content">Competitor Price</span>
     </div>
-    <span class="font-semibold font-display text-base-content">₹{competitorPrice.toFixed(2)}</span>
+    <span class="font-semibold font-display text-base-content flex items-center">₹<NumberFlow value={competitorPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} /></span>
   </div>
 
   <!-- Row 3: Our Price -->
@@ -49,7 +51,7 @@
       </div>
       <span class="font-medium text-base text-base-content">Our Price</span>
     </div>
-    <span class="font-semibold font-display text-base-content">₹{ourPrice.toFixed(2)}</span>
+    <span class="font-semibold font-display text-base-content flex items-center">₹<NumberFlow value={ourPrice} format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }} /></span>
   </div>
 
   <!-- Row 4: Day Type -->
