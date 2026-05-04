@@ -95,9 +95,9 @@
     <div class="flex flex-col gap-2">
       <div class="flex justify-between items-end mb-2">
         <label for="comp-price-input" class="text-base-content text-base font-semibold">Competitor Price (₹)</label>
-        <span class="text-3xl font-bold font-display tracking-tight">₹{competitorPrice}</span>
+        <span class="text-3xl font-bold font-display tracking-tight flex items-center">₹<NumberFlow value={competitorPrice} /></span>
       </div>
-      <input id="comp-price-input" type="range" min="0" max="150" bind:value={competitorPrice} class="range" />
+      <input id="comp-price-input" type="range" min="0" max="10000" bind:value={competitorPrice} class="range range-primary" />
     </div>
 
     <div class="divider my-0"></div>
