@@ -3,6 +3,9 @@ name: Deploy Site to GitHub Pages
 on:
   push:
     branches: ["main", "master"]
+    paths:
+      - 'apps/site-demo/**'
+      - '.github/workflows/site-build-deploy.yml'
   workflow_dispatch:
 
 permissions:
@@ -27,15 +30,17 @@ jobs:
           bun-version: latest
 
       - name: Install Dependencies
+        working-directory: apps/site-demo
         run: bun install
 
       - name: Build App
+        working-directory: apps/site-demo
         run: bun run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ./dist
+          path: ./apps/site-demo/dist
 
   deploy:
     environment:

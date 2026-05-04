@@ -5,5 +5,5 @@ import UnoCSS from "unocss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte(), UnoCSS()],
-  base: "/price_prediction",
+  base: "/dynamic_pricing_optimizer",
 });

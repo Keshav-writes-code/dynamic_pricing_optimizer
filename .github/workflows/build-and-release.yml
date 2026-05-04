@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '**'
+      - '!apps/site-demo/**'
+      - '.github/workflows/build-and-release.yml'
   workflow_dispatch:
 
 permissions:
