@@ -45,17 +45,15 @@ async fn main() {
     let handle = builder.install_recorder().unwrap();
 
     let origins = [
-        "http://localhost:5173/".parse::<HeaderValue>().unwrap(),
-        "https://keshav.is-a.dev/price_prediction"
-            .parse::<HeaderValue>()
-            .unwrap(),
+        "http://localhost:5173".parse::<HeaderValue>().unwrap(),
+        "https://keshav.is-a.dev".parse::<HeaderValue>().unwrap(),
     ];
 
     let cors = CorsLayer::new()
         .allow_origin(origins)
         .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
-        .allow_headers([http::header::CONTENT_TYPE, http::header::AUTHORIZATION])
-        .allow_credentials(true);
+        .allow_headers(tower_http::cors::Any)
+        .allow_credentials(false);
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
